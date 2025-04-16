@@ -58,8 +58,16 @@ function moveLeft()
                 while Curr >=1 or board[row][Curr-1] ~= nil do
                     Curr = Curr - 1
                 end
-                board[row][Curr] = board[row][col];
-                board[row][col] = nil
+
+                -- if the tile we are moving to and the current tile have the same
+                -- number, then merge the tiles. Otherwise, just move the tile to
+                -- the new location 
+                if board[row][Curr-1] ~= nil and board[row][Curr-1] == board[row][col] then
+                    mergeTiles(row, Curr, row, col)
+                else
+                    board[row][Curr] = board[row][col];
+                    board[row][col] = nil
+                end
             end
         end
     end
@@ -77,8 +85,15 @@ function moveRight()
                 while Curr <= 4 or board[row][Curr+1] ~= nil do
                     Curr = Curr + 1
                 end
-                board[row][Curr] = board[row][col];
-                board[row][col] = nil
+                -- if the tile we are moving to and the current tile have the same
+                -- number, then merge the tiles. Otherwise, just move the tile to
+                -- the new location 
+                if board[row][Curr+1] ~= nil and board[row][Curr+1] == board[row][col] then
+                    mergeTiles(row, Curr, row, col)
+                else
+                    board[row][Curr] = board[row][col];
+                    board[row][col] = nil
+                end
             end
         end
     end
@@ -97,8 +112,15 @@ function moveUp()
                 while Curr >= 1 or board[Curr-1][col] ~= nil do
                     Curr = Curr - 1
                 end
-                board[Curr][col] = board[row][col]
-                board[row][col] = nil
+                -- if the tile we are moving to and the current tile have the same
+                -- number, then merge the tiles. Otherwise, just move the tile to
+                -- the new location 
+                if board[Curr-1][col] ~= nil and board[Curr-1][col] == board[row][col] then
+                    mergeTiles(Curr, col, row, col)
+                else
+                    board[row][Curr] = board[row][col];
+                    board[row][col] = nil
+                end
             end
         end
     end
@@ -116,8 +138,15 @@ function moveDown()
                 while Curr <= 4 or board[Curr+1][col] ~= nil do
                     Curr = Curr + 1
                 end
-                board[Curr][col] = board[row][col]
-                board[row][col] = nil
+                -- if the tile we are moving to and the current tile have the same
+                -- number, then merge the tiles. Otherwise, just move the tile to
+                -- the new location 
+                if board[Curr+1][col] ~= nil and board[Curr+1][col] == board[row][col] then
+                    mergeTiles(Curr, col, row, col)
+                else
+                    board[row][Curr] = board[row][col];
+                    board[row][col] = nil
+                end
             end
         end
     end
