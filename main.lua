@@ -52,6 +52,8 @@ function moveLeft()
     for row = 1, 4 do
         for col = 2, 4 do
             Curr = col
+            -- move current tile left until it reaches the
+            -- end of the board, or until it hits another tile
             while Curr >= 0 or board[row][col] ~= nil do
                 Curr = Curr - 1
             end
@@ -67,6 +69,8 @@ function moveRight()
     for row = 1, 4 do
         for col = 3, 1, -1 do
             Curr = col
+            -- move current tile right until it reaches the
+            -- end of the board, or until it hits another tile
             while Curr <= 4 or board[row][col] ~= nil do
                 Curr = Curr + 1
             end
@@ -78,12 +82,37 @@ function moveRight()
 end
 
 function moveUp()
-    -- todo
-
+    -- slides all numbers on the board up
+    -- todo: merge common numbers
+    for col = 1, 4 do
+        for row = 2, 4 do
+            Curr = row
+            -- move current tile up until it reaches the
+            -- end of the board, or until it hits another tile
+            while Curr >= 0 or board[col][row] ~= nil do
+                Curr = Curr - 1
+            end
+            board[col][Curr] = board[col][row]
+            board[row][col] = nil
+        end
+    end
 end
 
 function moveDown() 
-    -- todo
+    -- slides all numbers on the board down
+    -- todo: merge common numbers
+    for col = 1, 4 do
+        for row = 4, 2, -1 do
+            Curr = row
+            -- move current tile down until it reaches the
+            -- end of the board, or until it hits another tile
+            while Curr <= 4 or board[col][row] ~= nil do
+                Curr = Curr + 1
+            end
+            board[col][Curr] = board[col][row]
+            board[row][col] = nil
+        end
+    end
 
 end
 
