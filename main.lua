@@ -1,10 +1,21 @@
+_G.love = require("love")
+
+function love.load()
+    -- for initializing the game
+
+end
+
+function love.update(dt)
+    -- will update UI every tick (millisecond? idk)
+
+end
+
 function love.draw()
+    -- create / load initial UI elements
     love.graphics.print("Hello World!")
 end
 
 -- initializing a 4x4 board
--- represent objects (tiles on the board
--- as functions)
 board = {
     {nil, nil, nil, nil},
     {nil, nil, nil, nil},
@@ -12,8 +23,7 @@ board = {
     {nil, nil, nil, nil}
 }
 
--- create a enum-like way to reference 
--- directions
+-- create a enum-like way to reference directions
 LEFT = 0
 RIGHT = 1
 UP = 2
@@ -152,10 +162,28 @@ function moveDown()
     end
 end
 
-
-
-function initUI() 
-
+function newTile()
+    -- will create a new tile in a random empty spot on the board
+    local emptySpots = {}
+    local i = 1
+    for row = 1, 4 do
+        for col = 1, 4 do
+            if board[row][col] == nil then
+                table.insert(emptySpots, i, {row, col})
+                i = i + 1
+            end
+        end
+    end
+    -- generate a random number, either 2 or 4
+    local newNum = math.random(0, 1)
+    -- ternary op I think?? (stack overflow said)
+    newNum = newNum == 0 and 2 or 4
+    -- generate a random spot out of the empty spots in the table
+    local newSpot = math.random(1, #emptySpots)
+    -- insert that new num in the new spot
+    local newX = emptySpots[newSpot][1]
+    local newY = emptySpots[newSpot][2]
+    board[newX][newY] = newNum
 end
 
 
