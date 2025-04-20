@@ -120,6 +120,7 @@ function board:move(dir)
 
     return moved
 end
+tileAnimations = {}
 
 function newTile(b)
     local empty = {}
@@ -135,6 +136,8 @@ function newTile(b)
         local choice = empty[math.random(#empty)]
         local val = math.random(0, 1) == 0 and 2 or 4
         b:setTileAt(choice[1], choice[2], val)
+
+        tileAnimations[choice[1] .. "_" .. choice[2]] = {scale = 0.1, time = 0}
     end
 end
 
@@ -162,6 +165,11 @@ end
 -- Game setup
 function love.load()
     game = board:new(4, 4)
+    tiles = {} -- create tiles for tile images 
+    local tileNums = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048}
+    for _, val in ipairs(tileNums) do 
+        tiles[val] = love.graphics.newImage("tiles/tile_" .. val .. ".png") -- get the tile images from folder
+    end
     newTile(game)
     newTile(game)
 end
@@ -182,18 +190,43 @@ function love.keypressed(key)
         end
     end
 end
-
+-- Update for animations
+function love.update(dt) 
+    for key, anim in pairs(tileAnimations) do 
+        anim.time = anim.time + dt
+        anim.scale = math.min(1, anim.scale + dt * 5)
+        if anim.scale >= 1 then 
+            tileAnimations[key] = nil 
+        end
+    end
+end
 -- Drawing
 function love.draw()
-    love.graphics.setFont(love.graphics.newFont(32))
+    local windowWidth, windowHeight = love.graphics.getDimensions() --get the dimensions to scale the board and tiles
+    local gridSize = math.min(windowWidth, windowHeight) * 0.9
+    local tileSize = gridSize / 4
+    local offsetX = (windowWidth - gridSize) / 2
+    local offsetY = (windowHeight - gridSize) / 2
+    love.graphics.setFont(love.graphics.newFont(math.floor(tileSize/3)))
     for row = 1, 4 do
         for col = 1, 4 do
             local val = game:getTileAt(row, col)
-            local x = 100 + (col - 1) * 100
-            local y = 100 + (row - 1) * 100
-            love.graphics.rectangle("line", x, y, 90, 90)
+            local x = offsetX + (col - 1) * tileSize
+            local y = offsetY + (row - 1) * tileSize
+            love.graphics.rectangle("line", x, y, tileSize, tileSize)
             if val then
-                love.graphics.printf(val, x, y + 30, 90, "center")
+                local tileImage = tiles[val] --get the tile image associated with the value
+                if tileImage then
+                    local sx = tileSize / tileImage:getWidth()
+                    local sy = tileSize / tileImage:getHeight() 
+                    local anim = tileAnimations[row .. "_" .. col]
+                    local scale = anim and anim.scale or 1
+                    local scaledSize = tileSize * scale
+                    local offset = (tileSize - scaledSize) / 2 
+                    love.graphics.draw(tileImage, x + offset, y + offset, 0, scale * sx, scale * sy)
+                else
+                    love.graphics.printf(val, x, y + tileSize / 3, tileSize, "center")
+                end
             end
         end
     end
