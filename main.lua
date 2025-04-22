@@ -15,6 +15,7 @@ board = {}
 board.__index = board
 
 function board:new(rows, cols)
+    -- create a new board with the given number of rows and columns 
     local Tiles = setmetatable({}, board)
     Tiles.rows = rows
     Tiles.cols = cols
@@ -28,6 +29,7 @@ function board:new(rows, cols)
 end
 
 function board:getTileAt(row, col)
+    -- checks and returns the tile at the given row and col
     if row >= 1 and row <= self.rows and col >= 1 and col <= self.cols then
         return self[row][col]
     end
@@ -35,19 +37,30 @@ function board:getTileAt(row, col)
 end
 
 function board:setTileAt(row, col, value)
+    -- checks if the row and col are within bounds
     if row >= 1 and row <= self.rows and col >= 1 and col <= self.cols then
         self[row][col] = value
     end
 end
 
 function board:mergeTiles(fromRow, fromCol, toRow, toCol)
-    local sum = self:getTileAt(fromRow, fromCol) + self:getTileAt(toRow, toCol)
+    -- adds the two tiles together and sets the tile at the toRow and toCol to the sum
+    local sum = self:getTileAt(fromRow, fromCol) + self:getTileAt(toRow, toCol) 
     self:setTileAt(toRow, toCol, sum)
     self:setTileAt(fromRow, fromCol, nil)
 end
 
 function board:move(dir)
     local moved = false
+
+    -- Initialize or reset the merged tracker
+    local mergedThisTurn = {}
+    for r = 1, self.rows do
+        mergedThisTurn[r] = {}
+        for c = 1, self.cols do
+            mergedThisTurn[r][c] = false
+        end
+    end
 
     if dir == LEFT then
         for row = 1, self.rows do
@@ -59,8 +72,13 @@ function board:move(dir)
                     curr = curr - 1
                     moved = true
                 end
-                if curr > 1 and self:getTileAt(row, curr) ~= nil and self:getTileAt(row, curr) == self:getTileAt(row, curr - 1) then
+                if curr > 1 and
+                   self:getTileAt(row, curr) ~= nil and
+                   self:getTileAt(row, curr) == self:getTileAt(row, curr - 1) and
+                   not mergedThisTurn[row][curr - 1] then
+
                     self:mergeTiles(row, curr, row, curr - 1)
+                    mergedThisTurn[row][curr - 1] = true
                     moved = true
                 end
             end
@@ -76,8 +94,13 @@ function board:move(dir)
                     curr = curr + 1
                     moved = true
                 end
-                if curr < self.cols and self:getTileAt(row, curr) ~= nil and self:getTileAt(row, curr) == self:getTileAt(row, curr + 1) then
+                if curr < self.cols and
+                   self:getTileAt(row, curr) ~= nil and
+                   self:getTileAt(row, curr) == self:getTileAt(row, curr + 1) and
+                   not mergedThisTurn[row][curr + 1] then
+
                     self:mergeTiles(row, curr, row, curr + 1)
+                    mergedThisTurn[row][curr + 1] = true
                     moved = true
                 end
             end
@@ -93,8 +116,13 @@ function board:move(dir)
                     curr = curr - 1
                     moved = true
                 end
-                if curr > 1 and self:getTileAt(curr, col) ~= nil and self:getTileAt(curr, col) == self:getTileAt(curr - 1, col) then
+                if curr > 1 and
+                   self:getTileAt(curr, col) ~= nil and
+                   self:getTileAt(curr, col) == self:getTileAt(curr - 1, col) and
+                   not mergedThisTurn[curr - 1][col] then
+
                     self:mergeTiles(curr, col, curr - 1, col)
+                    mergedThisTurn[curr - 1][col] = true
                     moved = true
                 end
             end
@@ -110,8 +138,13 @@ function board:move(dir)
                     curr = curr + 1
                     moved = true
                 end
-                if curr < self.rows and self:getTileAt(curr, col) ~= nil and self:getTileAt(curr, col) == self:getTileAt(curr + 1, col) then
+                if curr < self.rows and
+                   self:getTileAt(curr, col) ~= nil and
+                   self:getTileAt(curr, col) == self:getTileAt(curr + 1, col) and
+                   not mergedThisTurn[curr + 1][col] then
+
                     self:mergeTiles(curr, col, curr + 1, col)
+                    mergedThisTurn[curr + 1][col] = true
                     moved = true
                 end
             end
@@ -120,6 +153,8 @@ function board:move(dir)
 
     return moved
 end
+
+
 tileAnimations = {}
 
 function newTile(b)
@@ -164,6 +199,7 @@ end
 
 -- Game setup
 function love.load()
+    love.graphics.setBackgroundColor(1.0, 0.992, 0.816) -- set background color
     game = board:new(4, 4)
     tiles = {} -- create tiles for tile images 
     local tileNums = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048}
