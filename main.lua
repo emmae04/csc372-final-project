@@ -249,7 +249,7 @@ end
 function love.mousepressed(x, y, button)
     if gameOver and button == 1 then 
         local windowWidth, windowHeight = love.graphics.getDimensions()
-        local gridSize = math.min(windowWidth, windowHeight) * 0.9
+        local gridSize = math.min(windowWidth, windowHeight) * 0.7
         local offsetY = (windowHeight - gridSize) / 2
         local buttonWidth = windowWidth * 0.3
         local buttonHeight = windowHeight * 0.08
@@ -274,7 +274,7 @@ end
 -- Drawing
 function love.draw()
     local windowWidth, windowHeight = love.graphics.getDimensions() --get the dimensions to scale the board and tiles
-    local gridSize = math.min(windowWidth, windowHeight) * 0.9
+    local gridSize = math.min(windowWidth, windowHeight) * 0.7
     local tileSize = gridSize / 4
     local offsetX = (windowWidth - gridSize) / 2
     local offsetY = (windowHeight - gridSize) / 2
@@ -285,7 +285,7 @@ function love.draw()
         local buttonX = (windowWidth - buttonWidth) / 2
         local buttonY = offsetY + gridSize + 20
         love.graphics.setColor(0, 0, 0)
-        love.graphics.printf("Game Over!", 0, offsetY - 40, windowWidth, "center")
+        love.graphics.printf("Game Over!", 0, offsetY - 80, windowWidth, "center")
         love.graphics.rectangle("fill", buttonX, buttonY, buttonWidth, buttonHeight)
         love.graphics.setColor(1, 1, 1)
         love.graphics.printf("Restart", buttonX, buttonY + 15, buttonWidth, "center")
