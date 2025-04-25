@@ -52,7 +52,7 @@ end
 
 function board:move(dir)
     local moved = false
-
+    local merged = false
     -- Initialize or reset the merged tracker
     local mergedThisTurn = {}
     for r = 1, self.rows do
@@ -80,6 +80,7 @@ function board:move(dir)
                     self:mergeTiles(row, curr, row, curr - 1)
                     mergedThisTurn[row][curr - 1] = true
                     moved = true
+                    merged = true
                 end
             end
         end
@@ -102,6 +103,7 @@ function board:move(dir)
                     self:mergeTiles(row, curr, row, curr + 1)
                     mergedThisTurn[row][curr + 1] = true
                     moved = true
+                    merged = true
                 end
             end
         end
@@ -124,6 +126,7 @@ function board:move(dir)
                     self:mergeTiles(curr, col, curr - 1, col)
                     mergedThisTurn[curr - 1][col] = true
                     moved = true
+                    merged = true
                 end
             end
         end
@@ -146,12 +149,13 @@ function board:move(dir)
                     self:mergeTiles(curr, col, curr + 1, col)
                     mergedThisTurn[curr + 1][col] = true
                     moved = true
+                    merged = true
                 end
             end
         end
     end
 
-    return moved
+    return moved, merged
 end
 
 
@@ -176,6 +180,7 @@ function newTile(b)
     end
 end
 
+gameOver = false -- global variable to check if reset button should be drawn without having to check isGameOver every frame
 function isGameOver(b)
     for row = 1, 4 do
         for col = 1, 4 do
@@ -196,7 +201,13 @@ function isGameOver(b)
     end
     return true
 end
-
+-- Resets game if the user wants to play again
+function resetGame()
+    game = board:new(4, 4)
+    tileAnimations = {}
+    newTile(game)
+    newTile(game)
+end
 -- Game setup
 function love.load()
     love.graphics.setBackgroundColor(1.0, 0.992, 0.816) -- set background color
@@ -206,23 +217,47 @@ function love.load()
     for _, val in ipairs(tileNums) do 
         tiles[val] = love.graphics.newImage("tiles/tile_" .. val .. ".png") -- get the tile images from folder
     end
+    popSoundEffect = love.audio.newSource("sounds/pop.mp3", "static")
+    slideSoundEffect = love.audio.newSource("sounds/slide.mp3", "static")
     newTile(game)
     newTile(game)
 end
 
 -- Input
 function love.keypressed(key)
-    local moved = false
-    if key == "left" then moved = game:move(LEFT)
-    elseif key == "right" then moved = game:move(RIGHT)
-    elseif key == "up" then moved = game:move(UP)
-    elseif key == "down" then moved = game:move(DOWN)
+    local moved, merged = false, false
+    if key == "left" then moved, merged = game:move(LEFT)
+    elseif key == "right" then moved, merged = game:move(RIGHT)
+    elseif key == "up" then moved, merged = game:move(UP)
+    elseif key == "down" then moved, merged = game:move(DOWN)
     end
 
     if moved then
+        if merged then
+            love.audio.play(popSoundEffect)
+        else
+            love.audio.play(slideSoundEffect)
+        end
         newTile(game)
         if isGameOver(game) then
+            gameOver = true
             print("Game Over!")
+        end
+    end
+end
+-- Checks for mouse press on restart game button
+function love.mousepressed(x, y, button)
+    if gameOver and button == 1 then 
+        local windowWidth, windowHeight = love.graphics.getDimensions()
+        local gridSize = math.min(windowWidth, windowHeight) * 0.9
+        local offsetY = (windowHeight - gridSize) / 2
+        local buttonWidth = windowWidth * 0.3
+        local buttonHeight = windowHeight * 0.08
+        local buttonX = (windowWidth - buttonWidth) / 2
+        local buttonY = offsetY + gridSize + 20 
+        if x >= buttonX and x <= buttonX + buttonWidth and y >= buttonY and y <= buttonY + buttonHeight then
+            resetGame()
+            gameOver = false
         end
     end
 end
@@ -244,6 +279,18 @@ function love.draw()
     local offsetX = (windowWidth - gridSize) / 2
     local offsetY = (windowHeight - gridSize) / 2
     love.graphics.setFont(love.graphics.newFont(math.floor(tileSize/3)))
+    if gameOver then --creates the reset button if the game is over
+        local buttonWidth = windowWidth * 0.3
+        local buttonHeight = windowHeight * 0.08
+        local buttonX = (windowWidth - buttonWidth) / 2
+        local buttonY = offsetY + gridSize + 20
+        love.graphics.setColor(0, 0, 0)
+        love.graphics.printf("Game Over!", 0, offsetY - 40, windowWidth, "center")
+        love.graphics.rectangle("fill", buttonX, buttonY, buttonWidth, buttonHeight)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.printf("Restart", buttonX, buttonY + 15, buttonWidth, "center")
+        --love.graphics.setColor(1, 1, 1)
+    end
     for row = 1, 4 do
         for col = 1, 4 do
             local val = game:getTileAt(row, col)
