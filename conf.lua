@@ -11,9 +11,9 @@ function love.conf(t) -- t = var passed in that includes information to be passe
     t.modules.graphics = true -- enable graphics module
     t.modules.image = true -- enable image module
 
-    t.window.title = "2048 WIP" -- set window title
+    t.window.title = "2048" -- set window title
     t.window.width = 800 -- set window width
-    t.window.height = 600 -- set window height
+    t.window.height = 750 -- set window height
     t.window.resizable = true -- make window resizable
     t.window.fullscreen = false -- set fullscreen mode
     
